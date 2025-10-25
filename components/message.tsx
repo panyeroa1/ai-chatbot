@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { memo, useState } from "react";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
 import { cn, sanitizeText } from "@/lib/utils";
 import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
@@ -34,6 +35,7 @@ const PurePreviewMessage = ({
   regenerate,
   isReadonly,
   requiresScrollPadding,
+  usage,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -43,6 +45,7 @@ const PurePreviewMessage = ({
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
   requiresScrollPadding: boolean;
+  usage?: AppUsage;
 }) => {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -277,6 +280,7 @@ const PurePreviewMessage = ({
               key={`action-${message.id}`}
               message={message}
               setMode={setMode}
+              usage={usage}
               vote={vote}
             />
           )}
@@ -328,12 +332,9 @@ export const ThinkingMessage = () => {
         </div>
 
         <div className="flex w-full flex-col gap-2 md:gap-4">
-          <div className="p-0 text-muted-foreground text-sm">
-            Thinking...
-          </div>
+          <div className="p-0 text-muted-foreground text-sm">Thinking...</div>
         </div>
       </div>
     </motion.div>
   );
 };
-

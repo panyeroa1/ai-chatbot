@@ -5,8 +5,15 @@ import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
 import { Action, Actions } from "./elements/actions";
-import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+import {
+  CopyIcon,
+  InfoIcon,
+  PencilEditIcon,
+  ThumbDownIcon,
+  ThumbUpIcon,
+} from "./icons";
 
 export function PureMessageActions({
   chatId,
@@ -14,12 +21,14 @@ export function PureMessageActions({
   vote,
   isLoading,
   setMode,
+  usage,
 }: {
   chatId: string;
   message: ChatMessage;
   vote: Vote | undefined;
   isLoading: boolean;
   setMode?: (mode: "view" | "edit") => void;
+  usage?: AppUsage;
 }) {
   const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -71,6 +80,41 @@ export function PureMessageActions({
       <Action onClick={handleCopy} tooltip="Copy">
         <CopyIcon />
       </Action>
+
+      {usage && (
+        <Action
+          tooltip={
+            <div className="flex flex-col gap-1 text-xs">
+              <div className="font-semibold">Eburon AI GPU</div>
+              <div className="flex flex-col gap-0.5">
+                {usage.totalTokens && (
+                  <div>Total Tokens: {usage.totalTokens.toLocaleString()}</div>
+                )}
+                {usage.inputTokens && (
+                  <div>Input Tokens: {usage.inputTokens.toLocaleString()}</div>
+                )}
+                {usage.outputTokens && (
+                  <div>
+                    Output Tokens: {usage.outputTokens.toLocaleString()}
+                  </div>
+                )}
+                {usage.cachedInputTokens && usage.cachedInputTokens > 0 && (
+                  <div>
+                    Cached Input: {usage.cachedInputTokens.toLocaleString()}
+                  </div>
+                )}
+                {usage.modelId && (
+                  <div className="mt-1 text-muted-foreground">
+                    Model: {usage.modelId}
+                  </div>
+                )}
+              </div>
+            </div>
+          }
+        >
+          <InfoIcon />
+        </Action>
+      )}
 
       <Action
         data-testid="message-upvote"
