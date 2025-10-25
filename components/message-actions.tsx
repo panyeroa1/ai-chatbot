@@ -5,8 +5,15 @@ import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
 import { Action, Actions } from "./elements/actions";
-import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+import {
+  CopyIcon,
+  InfoIcon,
+  PencilEditIcon,
+  ThumbDownIcon,
+  ThumbUpIcon,
+} from "./icons";
 
 export function PureMessageActions({
   chatId,
@@ -34,6 +41,11 @@ export function PureMessageActions({
     .join("\n")
     .trim();
 
+  // Extract usage data from message parts
+  const usageData = message.parts?.find((part) => part.type === "data-usage") as
+    | { type: "data-usage"; data: AppUsage }
+    | undefined;
+
   const handleCopy = async () => {
     if (!textFromParts) {
       toast.error("There's no text to copy!");
@@ -42,6 +54,36 @@ export function PureMessageActions({
 
     await copyToClipboard(textFromParts);
     toast.success("Copied to clipboard!");
+  };
+
+  // Format telemetry info for tooltip
+  const getTelemetryTooltip = () => {
+    if (!usageData?.data) {
+      return null;
+    }
+
+    const usage = usageData.data;
+
+    return (
+      <div className="space-y-1 text-xs">
+        <div className="font-semibold">Eburon AI GPU</div>
+        {usage.inputTokens !== undefined && (
+          <div>Input: {usage.inputTokens.toLocaleString()} tokens</div>
+        )}
+        {usage.outputTokens !== undefined && (
+          <div>Output: {usage.outputTokens.toLocaleString()} tokens</div>
+        )}
+        {usage.totalTokens !== undefined && (
+          <div>Total: {usage.totalTokens.toLocaleString()} tokens</div>
+        )}
+        {usage.costUSD?.totalUSD !== undefined && (
+          <div>
+            Cost: $
+            {Number.parseFloat(usage.costUSD.totalUSD.toString()).toFixed(6)}
+          </div>
+        )}
+      </div>
+    );
   };
 
   // User messages get edit (on hover) and copy actions
@@ -71,6 +113,12 @@ export function PureMessageActions({
       <Action onClick={handleCopy} tooltip="Copy">
         <CopyIcon />
       </Action>
+
+      {usageData?.data && (
+        <Action tooltip={getTelemetryTooltip()}>
+          <InfoIcon />
+        </Action>
+      )}
 
       <Action
         data-testid="message-upvote"

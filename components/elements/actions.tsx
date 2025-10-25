@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,7 @@ export const Actions = ({ className, children, ...props }: ActionsProps) => (
 );
 
 export type ActionProps = ComponentProps<typeof Button> & {
-  tooltip?: string;
+  tooltip?: string | React.ReactNode;
   label?: string;
 };
 
@@ -54,7 +55,7 @@ export const Action = ({
         <Tooltip>
           <TooltipTrigger asChild>{button}</TooltipTrigger>
           <TooltipContent>
-            <p>{tooltip}</p>
+            {typeof tooltip === "string" ? <p>{tooltip}</p> : tooltip}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
