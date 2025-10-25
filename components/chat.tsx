@@ -172,6 +172,7 @@ export function Chat({
           selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}
+          usage={usage}
           votes={votes}
         />
 
